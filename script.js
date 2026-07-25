@@ -16,8 +16,10 @@ function renderQuiz() {
     <div class="choices" role="list">
       ${question.choices
         .map(
-          (choice, index) =>
-            `<button type="button" class="choice-button" data-index="${index}">${choice}</button>`
+          (choice, index) => {
+            const label = ['A', 'B', 'C', 'D'][index] || `${index + 1}`;
+            return `<button type="button" class="choice-button" data-index="${index}"><span class="choice-label">${label}.</span> ${choice}</button>`;
+          }
         )
         .join('')}
     </div>
