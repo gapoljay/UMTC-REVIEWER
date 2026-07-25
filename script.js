@@ -3,6 +3,7 @@ import { questions } from './questions.js';
 const quizCard = document.getElementById('quiz-card');
 let currentQuestionIndex = 0;
 let score = 0;
+let wrongAnswers = 0;
 let hasAnswered = false;
 
 function renderQuiz() {
@@ -63,6 +64,8 @@ function handleChoiceClick(event) {
 
   if (selectedIndex === correctIndex) {
     score += 1;
+  } else {
+    wrongAnswers += 1;
   }
 
   const feedback = document.createElement('div');
@@ -90,7 +93,17 @@ function showResult() {
   quizCard.innerHTML = `
     <div class="result-card">
       <h2>Quiz complete!</h2>
-      <p class="result-text">You scored ${score} out of ${questions.length}.</p>
+      <div class="result-summary">
+        <div class="result-pill">
+          <span class="result-label">Correct</span>
+          <strong>${score}/${questions.length}</strong>
+        </div>
+        <div class="result-pill">
+          <span class="result-label">Wrong</span>
+          <strong>${wrongAnswers}/${questions.length}</strong>
+        </div>
+      </div>
+      <p class="result-text">You answered ${score} correctly and ${wrongAnswers} incorrectly.</p>
       <button type="button" id="restart-button" class="restart-button">Try again</button>
     </div>
   `;
@@ -98,6 +111,7 @@ function showResult() {
   document.getElementById('restart-button').addEventListener('click', () => {
     currentQuestionIndex = 0;
     score = 0;
+    wrongAnswers = 0;
     hasAnswered = false;
     renderQuiz();
   });

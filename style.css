@@ -149,8 +149,36 @@ body {
 }
 
 .result-card h2 {
-  margin-bottom: 12px;
+  margin-bottom: 18px;
   font-size: 2rem;
+}
+
+.result-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.result-pill {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.result-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.result-pill strong {
+  font-size: 1.35rem;
+  color: #111827;
 }
 
 .result-text {
