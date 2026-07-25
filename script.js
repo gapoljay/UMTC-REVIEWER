@@ -35,6 +35,9 @@ let wrongAnswers = 0;
 let part3Correct = 0;
 let part3Wrong = 0;
 
+let part4Correct = 0;
+let part4Wrong = 0;
+
 let hasAnswered = false;
 
 function getCurrentQuestions() {
@@ -68,6 +71,7 @@ function renderQuiz() {
   const questions = getCurrentQuestions();
   const question = questions[currentQuestionIndex];
 
+  hasAnswered = false;
 quizCard.innerHTML = `
 <div class="question-header">
     <span class="question-count">
@@ -100,7 +104,8 @@ ${choice}
 
 <button
 id="next-button"
-class="next-button">
+class="next-button"
+disabled>
 
 Next
 
@@ -109,6 +114,9 @@ Next
 </div>
 `;
   document.getElementById('next-button').addEventListener('click', handleNextClick);
+  document.querySelectorAll('.choice-button').forEach(button => {
+    button.addEventListener('click', handleChoiceClick);
+});
 }
 
 function renderMatchingSection() {
@@ -118,11 +126,11 @@ function renderMatchingSection() {
     <div class="question-header">
       <span class="question-count">${sections[currentSectionIndex].name}</span>
       <h2>Identify the following by matching them with the selections given below.</h2>
-      <p class="section-instruction">Write your answers in the space provided before the number.</p>
+      <p class="section-instruction">Write your answers in the space provided after the number.</p>
     </div>
 
     <div class="matching-instruction-card">
-      <p>Part I. Matching Type Questions. The following are important things that Electro-Technical Officers onboard the ship should know for the safety of the crew, the equipment, and the environment. Identify the following by matching them with the selections given below. Write your answers in the space provided before the number.</p>
+      <p>Part I. Matching Type Questions. The following are important things that Electro-Technical Officers onboard the ship should know for the safety of the crew, the equipment, and the environment. Identify the following by matching them with the selections given below. Write your answers in the space provided after the number.</p>
       <img class="matching-image" src="files/images/matching-type/matching-type.JPG" alt="Matching type answer reference image" />
     </div>
 
@@ -166,7 +174,7 @@ function renderIdentificationSection() {
     <div class="question-header">
       <span class="question-count">${sections[currentSectionIndex].name}</span>
       <h2>Identify the following terminologies used in electro-technical equipment relevant to the job of an Electro-Technical Officer onboard the ship.</h2>
-      <p class="section-instruction">Write your answer in the space provided before the number.</p>
+      <p class="section-instruction">Write your answer in the space provided after the number.</p>
     </div>
 
     <div class="identification-list">
@@ -279,9 +287,11 @@ function handleChoiceClick(event) {
   });
 
   if (selectedIndex === correctIndex) {
-    score += 1;
+      score++;
+      part4Correct++;
   } else {
-    wrongAnswers += 1;
+      wrongAnswers++;
+      part4Wrong++;
   }
 
   const feedback = document.createElement('div');
@@ -322,14 +332,30 @@ function handleMatchingSubmit() {
       <div class="feedback-score">${correctCount}/${questions.length}</div>
       <p class="feedback-summary">You answered ${correctCount} correctly and ${incorrectCount} incorrectly.</p>
       <div class="review-list">
-        ${results.map((result, index) => `
-          <div class="review-item ${result.isCorrect ? 'review-correct' : 'review-wrong'}">
-            <strong>${index + 1}.</strong> ${result.isCorrect ? '✅' : '❌'}
-            <span>Your answer: ${result.actual || '—'}</span>
-            <span>Correct answer: ${result.expected}</span>
-          </div>
-        `).join('')}
+    ${results.map((result, index) => `
+      <div class="review-item ${result.isCorrect ? 'review-correct' : 'review-wrong'}">
+
+        <div class="review-question">
+          ${index + 1}. ${questions[index].prompt}
+        </div>
+
+        <div class="review-status">
+          ${result.isCorrect ? '✅ Correct' : '❌ Wrong'}
+        </div>
+
+        <div class="review-answer">
+          <strong>Your Answer:</strong>
+          <span>${result.actual || '—'}</span>
+        </div>
+
+        <div class="review-answer">
+          <strong>Correct Answer:</strong>
+          <span>${result.expected}</span>
+        </div>
+
       </div>
+    `).join('')}
+  </div>
     </div>
 
     <div class="quiz-controls">
@@ -585,14 +611,27 @@ function handleIdentificationSubmit() {
       <div class="feedback-score">${correctCount}/${questions.length}</div>
       <p class="feedback-summary">You answered ${correctCount} correctly and ${incorrectCount} incorrectly.</p>
       <div class="review-list">
-        ${results.map((result, index) => `
-          <div class="review-item ${result.isCorrect ? 'review-correct' : 'review-wrong'}">
-            <strong>${index + 1}.</strong> ${result.isCorrect ? '✅' : '❌'}
-            <span>Your answer: ${result.actual || '—'}</span>
-            <span>Correct answer: ${result.expected}</span>
-          </div>
-        `).join('')}
-      </div>
+      ${results.map((result, index) => `
+        <div class="review-item ${result.isCorrect ? 'review-correct' : 'review-wrong'}">
+
+          ${index + 1}. ${questions[index].prompt}
+
+          <br>
+
+          ${result.isCorrect ? '✅ Correct' : '❌ Wrong'}
+
+          <br>
+
+          <strong>Your Answer:</strong>
+          ${result.actual || '—'}
+
+          <br>
+
+          <strong>Correct Answer:</strong>
+          ${result.expected}
+
+        </div>
+      `).join('')}
     </div>
 
     <div class="quiz-controls">
@@ -604,51 +643,210 @@ function handleIdentificationSubmit() {
 }
 
 function handleNextClick() {
-  if (currentSectionIndex < sections.length - 1) {
-    currentSectionIndex += 1;
-    currentQuestionIndex = 0;
-    hasAnswered = false;
-    renderQuiz();
-    return;
-  }
 
-  showResult();
+    // Change behavior for Part 4
+    if (sections[currentSectionIndex].name.includes('Part 4')) {
+
+        const questions = getCurrentQuestions();
+
+        if (currentQuestionIndex < questions.length - 1) {
+
+            currentQuestionIndex++;
+            hasAnswered = false;
+            renderQuiz();
+
+        } else {
+
+            showPart4Summary();
+
+        }
+
+        return;
+    }
+
+    // Leave Part 1, Part 2 and Part 3 exactly as before
+    if (currentSectionIndex < sections.length - 1) {
+
+        currentSectionIndex++;
+        currentQuestionIndex = 0;
+        hasAnswered = false;
+        renderQuiz();
+
+    } else {
+
+        showResult();
+
+    }
+
+}
+
+function showPart4Summary() {
+
+    const total = getCurrentQuestions().length;
+
+    quizCard.innerHTML = `
+
+    <div class="result-card">
+
+        <h2>Part 4 Summary</h2>
+
+        <div class="result-summary">
+
+            <div class="result-pill">
+
+                <span class="result-label">
+                    Correct
+                </span>
+
+                <strong>${part4Correct}/${total}</strong>
+
+            </div>
+
+            <div class="result-pill">
+
+                <span class="result-label">
+                    Wrong
+                </span>
+
+                <strong>${part4Wrong}/${total}</strong>
+
+            </div>
+
+        </div>
+
+        <p class="result-text">
+
+            You answered ${part4Correct} correctly and ${part4Wrong} incorrectly.
+
+        </p>
+
+        <button
+            id="finish-quiz"
+            class="next-button">
+
+            Finish Quiz
+
+        </button>
+
+    </div>
+
+    `;
+
+    document
+        .getElementById("finish-quiz")
+        .addEventListener("click", showResult);
+
 }
 
 function showResult() {
-  const totalQuestions = sections.reduce((sum, section) => sum + section.items.length, 0);
 
-  quizCard.innerHTML = `
+    const totalQuestions =
+        part1Matching.length +
+        part2Identification.length +
+        part3Symbols.length +
+        part4MultipleChoice.length;
+
+    const totalPoints =
+        part1Matching.length +
+        part2Identification.length +
+        (part3Symbols.length * 2) +
+        part4MultipleChoice.length;
+
+    quizCard.innerHTML = `
+
     <div class="result-card">
-      <h2>Quiz complete!</h2>
-      <div class="result-summary">
-        <div class="result-pill">
-          <span class="result-label">Correct</span>
-          <strong>${score}/${totalQuestions}</strong>
+
+        <h2>🎉 Quiz Complete!</h2>
+
+        <div class="result-summary">
+
+            <div class="result-pill">
+
+                <span class="result-label">
+                    Questions
+                </span>
+
+                <strong>${totalQuestions}</strong>
+
+            </div>
+
+            <div class="result-pill">
+
+                <span class="result-label">
+                    Total Points
+                </span>
+
+                <strong>${totalPoints}</strong>
+
+            </div>
+
         </div>
-        <div class="result-pill">
-          <span class="result-label">Wrong</span>
-          <strong>${wrongAnswers}/${totalQuestions}</strong>
+
+        <div class="result-summary">
+
+            <div class="result-pill">
+
+                <span class="result-label">
+                    Score
+                </span>
+
+                <strong>${score}/${totalPoints}</strong>
+
+            </div>
+
+            <div class="result-pill">
+
+                <span class="result-label">
+                    Wrong
+                </span>
+
+                <strong>${wrongAnswers}/${totalPoints}</strong>
+
+            </div>
+
         </div>
-      </div>
-      <p class="result-text">You answered ${score} correctly and ${wrongAnswers} incorrectly.</p>
-      <button type="button" id="restart-button" class="restart-button">Try again</button>
+
+        <p class="result-text">
+
+            You completed <strong>${totalQuestions}</strong> questions.
+
+        </p>
+
+        <button
+            type="button"
+            id="restart-button"
+            class="restart-button">
+
+            Try Again
+
+        </button>
+
     </div>
-  `;
 
-  document.getElementById('restart-button').addEventListener('click', () => {
-    sections = createSections();
-    currentSectionIndex = 0;
-    currentQuestionIndex = 0;
-    score = 0;
-    wrongAnswers = 0;
+    `;
 
-    part3Correct = 0;
-    part3Wrong = 0;
+    document.getElementById("restart-button").addEventListener("click", () => {
 
-    hasAnswered = false;
-    renderQuiz();
-  });
+        sections = createSections();
+
+        currentSectionIndex = 0;
+        currentQuestionIndex = 0;
+
+        score = 0;
+        wrongAnswers = 0;
+
+        part3Correct = 0;
+        part3Wrong = 0;
+
+        part4Correct = 0;
+        part4Wrong = 0;
+
+        hasAnswered = false;
+
+        renderQuiz();
+
+    });
+
 }
 
 renderQuiz();

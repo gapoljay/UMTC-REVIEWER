@@ -1,5 +1,5 @@
-export const questions = [
-  {
+export const part4MultipleChoice = [
+ {
     id: 51,
     question: 'What is a measuring instrument that is used to measure current without actually making any connection in the wire being measured?',
     choices: ['Clamp meter', 'Megger tester', 'Multimeter', 'Voltage detector'],
