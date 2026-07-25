@@ -28,8 +28,13 @@ function createSections() {
 let sections = createSections();
 let currentSectionIndex = 0;
 let currentQuestionIndex = 0;
+
 let score = 0;
 let wrongAnswers = 0;
+
+let part3Correct = 0;
+let part3Wrong = 0;
+
 let hasAnswered = false;
 
 function getCurrentQuestions() {
@@ -63,28 +68,46 @@ function renderQuiz() {
   const questions = getCurrentQuestions();
   const question = questions[currentQuestionIndex];
 
-  quizCard.innerHTML = `
-    <div class="question-header">
-      <span class="question-count">${sections[currentSectionIndex].name} • Question ${currentQuestionIndex + 1} of ${questions.length}</span>
-      <h2>${question.question || question.prompt}</h2>
-    </div>
-    <div class="choices" role="list">
-      ${question.choices
-        .map((choice, index) => {
-          const label = ['A', 'B', 'C', 'D'][index] || `${index + 1}`;
-          return `<button type="button" class="choice-button" data-index="${index}"><span class="choice-label">${label}.</span> ${choice}</button>`;
-        })
-        .join('')}
-    </div>
-    <div class="quiz-controls">
-      <button type="button" id="next-button" class="next-button" disabled>Next</button>
-    </div>
-  `;
+quizCard.innerHTML = `
+<div class="question-header">
+    <span class="question-count">
+        ${sections[currentSectionIndex].name}
+        • Question ${currentQuestionIndex + 1}
+        of ${questions.length}
+    </span>
 
-  quizCard.querySelectorAll('.choice-button').forEach((button) => {
-    button.addEventListener('click', handleChoiceClick);
-  });
+    <h2>${question.question || question.prompt}</h2>
+</div>
 
+<div class="choices">
+
+${question.choices.map((choice,index)=>`
+
+<button
+type="button"
+class="choice-button"
+data-index="${index}">
+
+${choice}
+
+</button>
+
+`).join("")}
+
+</div>
+
+<div class="quiz-controls">
+
+<button
+id="next-button"
+class="next-button">
+
+Next
+
+</button>
+
+</div>
+`;
   document.getElementById('next-button').addEventListener('click', handleNextClick);
 }
 
@@ -172,12 +195,11 @@ function renderSymbolSection() {
   quizCard.innerHTML = `
     <div class="question-header">
       <span class="question-count">${sections[currentSectionIndex].name} • Question ${currentQuestionIndex + 1} of ${questions.length}</span>
-      <h2>${question.name}</h2>
       <p class="section-instruction">Identify the given symbol and briefly describe its function or operation.</p>
     </div>
 
     <div class="symbol-card">
-      <img class="symbol-image" src="${question.image}" alt="${question.name}" />
+      <img class="symbol-image" src="${question.image}" alt="Electro-Technical Symbol" />
       <div class="symbol-fields">
         <label class="identification-label" for="symbol-name-${currentQuestionIndex}">Name/Description</label>
         <input id="symbol-name-${currentQuestionIndex}" type="text" class="matching-input" data-role="name" />
@@ -222,13 +244,9 @@ function renderSymbolSection() {
     </div>
 
     <div class="quiz-controls">
-      <button type="button" id="next-button" class="next-button" disabled>Next</button>
+      <button type="button" id="next-button" class="next-button">Next</button>
     </div>
   `;
-
-  quizCard.querySelectorAll('.matching-input').forEach((input) => {
-    input.addEventListener('input', handleSymbolInput);
-  });
 
   document.getElementById('next-button').addEventListener('click', handleSymbolNext);
 }
@@ -322,37 +340,221 @@ function handleMatchingSubmit() {
   document.getElementById('next-button').addEventListener('click', handleNextClick);
 }
 
-function handleSymbolInput() {
-  const nameInput = quizCard.querySelector('[data-role="name"]');
-  const functionInput = quizCard.querySelector('[data-role="function"]');
+function handleSymbolNext() {
 
-  if (nameInput && functionInput) {
-    document.getElementById('next-button').disabled = !(nameInput.value.trim() && functionInput.value.trim());
-  }
+    const questions = getCurrentQuestions();
+    const question = questions[currentQuestionIndex];
+
+    const nameInput = quizCard.querySelector('[data-role="name"]');
+    const functionInput = quizCard.querySelector('[data-role="function"]');
+
+    const nameAnswer = nameInput.value.trim();
+    const functionAnswer = functionInput.value.trim();
+
+    const isNameCorrect =
+        normalizeAnswer(nameAnswer) === normalizeAnswer(question.answer);
+
+    const isFunctionCorrect =
+        normalizeAnswer(functionAnswer) === normalizeAnswer(question.functionAnswer);
+
+    if (isNameCorrect) {
+        score++;
+        part3Correct++;
+    } else {
+        wrongAnswers++;
+        part3Wrong++;
+    }
+
+    if (isFunctionCorrect) {
+        score++;
+        part3Correct++;
+    } else {
+        wrongAnswers++;
+        part3Wrong++;
+    }
+
+    showSymbolReview(
+        question,
+        nameAnswer,
+        functionAnswer,
+        isNameCorrect,
+        isFunctionCorrect
+    );
+
 }
 
-function handleSymbolNext() {
-  const questions = getCurrentQuestions();
-  const question = questions[currentQuestionIndex];
-  const nameInput = quizCard.querySelector('[data-role="name"]');
-  const functionInput = quizCard.querySelector('[data-role="function"]');
+function showSymbolReview(
+    question,
+    nameAnswer,
+    functionAnswer,
+    isNameCorrect,
+    isFunctionCorrect
+) {
 
-  const nameAnswer = nameInput ? nameInput.value.trim() : '';
-  const functionAnswer = functionInput ? functionInput.value.trim() : '';
-  const isNameCorrect = normalizeAnswer(nameAnswer) === normalizeAnswer(question.answer);
-  const isFunctionCorrect = normalizeAnswer(functionAnswer) === normalizeAnswer(question.functionAnswer);
+    const questions = getCurrentQuestions();
 
-  score += (isNameCorrect ? 1 : 0) + (isFunctionCorrect ? 1 : 0);
-  wrongAnswers += (isNameCorrect ? 0 : 1) + (isFunctionCorrect ? 0 : 1);
+    quizCard.innerHTML = `
 
-  if (currentQuestionIndex < questions.length - 1) {
-    currentQuestionIndex += 1;
-    hasAnswered = false;
-    renderQuiz();
-    return;
-  }
+<div class="question-header">
 
-  showResult();
+<h2>Review</h2>
+
+</div>
+
+<img
+class="review-symbol-image"
+src="${question.image}"
+alt="${question.answer}"
+>
+
+<div class="feedback-card">
+
+<div class="review-section ${isNameCorrect ? "review-correct" : "review-wrong"}">
+
+<h3>Name</h3>
+
+<p class="review-answer">
+
+<strong>Your Answer</strong>
+
+<br>
+
+${nameAnswer || "No Answer"}
+
+</p>
+
+<p class="review-answer">
+
+<strong>Correct Answer</strong>
+
+<br>
+
+${question.answer}
+
+</p>
+
+</div>
+
+<div class="review-section ${isFunctionCorrect ? "review-correct" : "review-wrong"}">
+
+<h3>Function</h3>
+
+<p class="review-answer">
+
+<strong>Your Answer</strong>
+
+<br>
+
+${functionAnswer || "No Answer"}
+
+</p>
+
+<p class="review-answer">
+
+<strong>Correct Answer</strong>
+
+<br>
+
+${question.functionAnswer}
+
+</p>
+
+</div>
+
+</div>
+
+<div class="quiz-controls">
+
+<button
+id="next-review"
+class="next-button">
+
+${
+currentQuestionIndex===questions.length-1
+?
+"Part 3 Summary"
+:
+"Next Question"
+}
+
+</button>
+
+</div>
+
+`;
+
+document
+.getElementById("next-review")
+.addEventListener("click",nextSymbolQuestion);
+
+}
+
+function nextSymbolQuestion() {
+
+    const questions = getCurrentQuestions();
+
+    if (currentQuestionIndex < questions.length - 1) {
+
+        currentQuestionIndex++;
+
+        renderQuiz();
+
+    } else {
+
+        showPart3Summary();
+
+    }
+
+}
+
+function showPart3Summary() {
+
+    quizCard.innerHTML = `
+
+    <div class="result-card">
+
+        <h2>Part 3 Summary</h2>
+
+        <div class="result-summary">
+
+            <div class="result-pill">
+
+                <span class="result-label">
+                    Correct
+                </span>
+
+                <strong>${part3Correct}</strong>
+
+            </div>
+
+            <div class="result-pill">
+
+                <span class="result-label">
+                    Wrong
+                </span>
+
+                <strong>${part3Wrong}</strong>
+
+            </div>
+
+        </div>
+
+        <button
+            id="next-section"
+            class="next-button">
+
+            Next Section
+
+        </button>
+
+    </div>
+
+    `;
+
+    document
+        .getElementById("next-section")
+        .addEventListener("click", handleNextClick);
+
 }
 
 function handleIdentificationSubmit() {
@@ -440,6 +642,10 @@ function showResult() {
     currentQuestionIndex = 0;
     score = 0;
     wrongAnswers = 0;
+
+    part3Correct = 0;
+    part3Wrong = 0;
+
     hasAnswered = false;
     renderQuiz();
   });

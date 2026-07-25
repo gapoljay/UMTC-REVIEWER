@@ -249,6 +249,50 @@ body {
   background: #1f2937;
 }
 
+/* ===== Part 3 Review ===== */
+
+.review-symbol-image {
+  display: block;
+  margin: 0 auto 20px;
+  width: 220px;
+  max-width: 100%;
+  padding: 12px;
+  background: #fff;
+  border-radius: 16px;
+}
+
+.review-section {
+  margin-bottom: 18px;
+  padding: 16px;
+  background: #1f2937;
+  border-radius: 14px;
+}
+
+.review-section h3 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  color: #818cf8;
+}
+
+.review-answer {
+  margin: 6px 0;
+  color: #f8fafc;
+}
+
+.review-answer strong {
+  display: inline-block;
+  width: 130px;
+  color: #ffffff;
+}
+
+.review-correct-answer {
+  color: #22c55e;
+}
+
+.review-wrong-answer {
+  color: #ef4444;
+}
+
 .identification-list {
   display: grid;
   gap: 14px;
@@ -361,4 +405,45 @@ body {
   font-size: 1.1rem;
   color: #cbd5e1;
 }
+.review-symbol-image{
+display:block;
+width:220px;
+margin:0 auto 25px;
+padding:12px;
+background:white;
+border-radius:16px;
+}
 
+.review-section{
+
+padding:20px;
+
+border-radius:14px;
+
+background:#1f2937;
+
+margin-bottom:20px;
+
+}
+
+.review-section h3{
+
+margin-top:0;
+
+margin-bottom:18px;
+
+font-size:24px;
+
+color:#60a5fa;
+
+text-align:center;
+
+}
+
+.review-answer{
+
+margin-bottom:18px;
+
+line-height:1.7;
+
+}
